@@ -19,7 +19,7 @@ char im[128];
 char data[128];
 int analog_value[128];
 int i=0;
-
+int debug = 1;
 byte
   peak[8],      // Peak level of each column; used for falling dots
   dotCount = 0, // Frame counter for delaying dot-falling speed
@@ -110,13 +110,17 @@ void loop()
   static long tt;
   int val;
   
+  if(debug)  Serial.println("Start sampling audio");
+    
+  
+  
   i = 0;
   while( i < 128)
   {
       analog_value[i] = analogRead(pin_adc);
       i++;  
   }
-
+  if(debug)  Serial.println("Finish sampling audio");
 
   for (i=0; i< 128;i++)
   { //Prepare data for FFT
@@ -124,8 +128,11 @@ void loop()
       im[i] = 0;
   }
    //this could be done with the fix_fftr function without the im array.
+  if(debug)  Serial.println("Start Fourier Transform");
   fix_fft(data,im,7,0);
+  
    // I am only interested in the absolute value of the transformation
+  if(debug)  Serial.println("Get absolute value transformation");
   for (i=0; i< 64;i++)
   {
        data[i] = sqrt(data[i] * data[i] + im[i] * im[i]);
@@ -147,22 +154,20 @@ void loop()
         }
         Serial.print("\n");
 //// Downsample spectrum output to 8 columns:
+  if(debug)  Serial.println("Downsample spectrum output to 8 columns");
   for(x=0; x<8; x++) {
     datacolumn   = (uint8_t *)&colData[x];
     nBins  = datacolumn[0] + 2;
     binNum = datacolumn[1];
+    if(debug)  Serial.println("Weighted Average summation");
     for(sum=0, i=2; i<nBins; i++)
       sum += (data[binNum++])*(datacolumn[i]); // Weighted
-    Serial.println(colDiv[x]);
-    
-    //catch zero division
-    if(colDiv[x] <= 0)
-    {
-      while(1)
-      {}
-    }
+//    Serial.println(colDiv[x]);
+    if(debug)  Serial.println("Averaging weighted average");
     col[x][colCount] = sum / colDiv[x];                    // Average
     minLvl = maxLvl = col[x][0];
+    
+    if(debug)  Serial.println("Get range of prior 10 frames");
     for(i=1; i<10; i++) { // Get range of prior 10 frames
       if(col[x][i] < minLvl)      minLvl = col[x][i];
       else if(col[x][i] > maxLvl) maxLvl = col[x][i];
@@ -173,19 +178,24 @@ void loop()
 //    // (e.g. at very low volume levels) the graph becomes super coarse
 //    // and 'jumpy'...so keep some minimum distance between them (this
 //    // also lets the graph go to zero when no sound is playing):
+    if(debug)  Serial.println("Vertically scaling the output graph");
     if((maxLvl - minLvl) < 8) maxLvl = minLvl + 8;
     minLvlAvg[x] = (minLvlAvg[x] * 7 + minLvl) >> 3; // Dampen min/max levels
     maxLvlAvg[x] = (maxLvlAvg[x] * 7 + maxLvl) >> 3; // (fake rolling average)
-//
+
+
+    if(debug)  Serial.println("Fixed point scale based on dynamic min/max levels");
     // Second fixed-point scale based on dynamic min/max levels:
     level = 10L * (col[x][colCount] - minLvlAvg[x]) /
       (long)(maxLvlAvg[x] - minLvlAvg[x]);
-//
-//    // Clip output and convert to byte:
+
+    if(debug)  Serial.println("Clip the output and convert it to byte");
+    //Clip output and convert to byte:
     if(level < 0L)      c = 0;
     else if(level > 10) c = 10; // Allow dot to go a couple pixels off top
     else                c = (uint8_t)level;
 
+    if(debug)  Serial.println("Keep the dot on the top");
     if(c > peak[x]) peak[x] = c; // Keep dot on top
 
     if(peak[x] <= 0) { // Empty column?
@@ -197,6 +207,7 @@ void loop()
 //
 //    // The 'peak' dot color varies, but doesn't necessarily match
 //    // the three screen regions...yellow has a little extra influence.
+    if(debug)  Serial.println("Draw pixels");
     y = 8 - peak[x];
     if(y < 2)      matrix.drawPixel(x, y, LED_RED);
     else if(y < 6) matrix.drawPixel(x, y, LED_YELLOW);
@@ -205,17 +216,18 @@ void loop()
 
   matrix.writeDisplay();
    // Every third frame, make the peak pixels drop by 1:
+   if(debug)  Serial.println("Make pixel drop by 1 every 3 frame dotcount");
   if(++dotCount >= 3) {
     dotCount = 0;
     for(x=0; x<8; x++) {
       if(peak[x] > 0) peak[x]--;
     }
   }
-  Serial.print("Dot count=");
-  Serial.println(dotCount);
-  Serial.print("Column count=");
-  Serial.println(colCount);
-//  if(++colCount > 7) colCount = 0;
+//  Serial.print("Dot count=");
+//  Serial.println(dotCount);
+//  Serial.print("Column count=");
+//  Serial.println(colCount);
+  if(++colCount >= 10) colCount = 0;
 
  
    
