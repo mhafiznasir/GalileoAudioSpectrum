@@ -25,7 +25,7 @@ byte
   dotCount = 0, // Frame counter for delaying dot-falling speed
   colCount = 0; // Frame counter for storing past column data
 int
-  col[8][8],   // Column levels for the prior 10 frames
+  col[8][10],   // Column levels for the prior 10 frames
   minLvlAvg[8], // For dynamic adjustment of low & high ends of graph,
   maxLvlAvg[8], // pseudo rolling averages for the prior few frames.
   colDiv[8];    // Used when filtering FFT output to 8 columns
@@ -179,10 +179,26 @@ void loop()
 //    // and 'jumpy'...so keep some minimum distance between them (this
 //    // also lets the graph go to zero when no sound is playing):
     if(debug)  Serial.println("Vertically scaling the output graph");
+    if(debug)
+    {
+      Serial.print("minLvlAvg : ");
+      Serial.println(minLvlAvg[x]);
+      Serial.print("maxLvlAvg : ");
+      Serial.println(maxLvlAvg[x]);
+
+    }
     if((maxLvl - minLvl) < 8) maxLvl = minLvl + 8;
     minLvlAvg[x] = (minLvlAvg[x] * 7 + minLvl) >> 3; // Dampen min/max levels
     maxLvlAvg[x] = (maxLvlAvg[x] * 7 + maxLvl) >> 3; // (fake rolling average)
-
+    
+    //temp swap
+    int temp_swap = 0;
+    if (maxLvlAvg[x] < minLvlAvg[x]) {
+      //temp_swap = minLvlAvg[x];  
+      temp_swap    = minLvlAvg[x]; //Min = min | Max = max | Temp = min 
+      minLvlAvg[x] = maxLvlAvg[x]; //Min = max | Max = max | Temp = min
+      maxLvlAvg[x] = temp_swap;    //Min = max | Max = min | Temp = min
+    }
 
     if(debug)  Serial.println("Fixed point scale based on dynamic min/max levels");
     // Second fixed-point scale based on dynamic min/max levels:
@@ -223,6 +239,13 @@ void loop()
       if(peak[x] > 0) peak[x]--;
     }
   }
+  
+  for(int v = 0;v < 8; v++)
+  {
+    Serial.print(col[x][colCount]);
+    Serial.print(" ");
+  }
+  Serial.println();
 //  Serial.print("Dot count=");
 //  Serial.println(dotCount);
 //  Serial.print("Column count=");
