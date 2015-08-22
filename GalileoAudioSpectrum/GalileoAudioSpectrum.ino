@@ -240,12 +240,12 @@ void loop()
     }
   }
   
-  for(int v = 0;v < 8; v++)
-  {
-    Serial.print(col[x][colCount]);
-    Serial.print(" ");
-  }
-  Serial.println();
+//  for(int v = 0;v < 8; v++)
+//  {
+//    Serial.print(col[x][colCount]);
+//    Serial.print(" ");
+//  }
+//  Serial.println();
 //  Serial.print("Dot count=");
 //  Serial.println(dotCount);
 //  Serial.print("Column count=");
