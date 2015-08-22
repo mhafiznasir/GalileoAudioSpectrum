@@ -19,7 +19,7 @@ char im[128];
 char data[128];
 int analog_value[128];
 int i=0;
-int debug = 1;
+int debug = 0;
 byte
   peak[8],      // Peak level of each column; used for falling dots
   dotCount = 0, // Frame counter for delaying dot-falling speed
@@ -140,19 +140,33 @@ void loop()
         if(data[i] < noise[i])
           data[i] = 0; 
         else
-          data[i] = (data[i] - noise[i])*( (256L - eq[i]) >> 8);
+          data[i] = ((data[i] - noise[i])*( (256L - eq[i])) >> 4);
+  
+//          data[i] = ((data[i] - noise[i])*( (256L - eq[i])) >> 8);
+
+
   }
+
+  
+          // view all data content
+//        for(int y = 0; y <64; y++)
+//        {
+//          Serial.print((uint8_t) data[y]);
+//          Serial.print(" ");
+//        }
+//        Serial.print("\n");
      // Fill background w/colors, then idle parts of columns will erase
       matrix.fillRect(0, 0, 8, 3, LED_RED);    // Upper section
       matrix.fillRect(0, 3, 8, 2, LED_YELLOW); // Mid
       matrix.fillRect(0, 5, 8, 3, LED_GREEN);  // Lower section
 
-        for(int y = 0; y <64; y++)
-        {
-          Serial.print((uint8_t) data[y]);
-          Serial.print(" ");
-        }
-        Serial.print("\n");
+//        // view all data content
+//        for(int y = 0; y <64; y++)
+//        {
+//          Serial.print((uint8_t) data[y]);
+//          Serial.print(" ");
+//        }
+//        Serial.print("\n");
 //// Downsample spectrum output to 8 columns:
   if(debug)  Serial.println("Downsample spectrum output to 8 columns");
   for(x=0; x<8; x++) {
