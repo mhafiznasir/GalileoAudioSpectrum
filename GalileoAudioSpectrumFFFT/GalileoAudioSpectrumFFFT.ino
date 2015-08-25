@@ -14,10 +14,11 @@ Port LED code from Adafruit Picollo
 #include <Adafruit_GFX.h>
 #include <stdint.h>  //For New Arduino
 #define pin_adc 0
-#include <fix_fft.h>
-char im[128];
-char data[128];
-int analog_value[128];
+#include <ffft.h>
+int16_t analog_value[128];
+complex_t     bfly_buff[128];  // FFT "butterfly" buffer
+uint16_t      data[64]; // Spectrum output buffer
+
 int i=0;
 int debug = 0;
 byte
@@ -112,6 +113,8 @@ void loop()
   
   if(debug)  Serial.println("Start sampling audio");
     
+  
+  
   i = 0;
   while( i < 128)
   {
@@ -120,25 +123,22 @@ void loop()
   }
   if(debug)  Serial.println("Finish sampling audio");
 
-  for (i=0; i< 128;i++)
-  { //Prepare data for FFT
-      data[i] = analog_value[i];
-      im[i] = 0;
-  }
+  fft_input(analog_value, bfly_buff);   // Samples -> complex #s
+  fft_execute(bfly_buff);          // Process complex data
+  fft_output(bfly_buff, data); // Complex -> spectrum
+
    //this could be done with the fix_fftr function without the im array.
   if(debug)  Serial.println("Start Fourier Transform");
-  fix_fft(data,im,7,0);
   
    // I am only interested in the absolute value of the transformation
   if(debug)  Serial.println("Get absolute value transformation");
   for (i=0; i< 64;i++)
   {
-       data[i] = sqrt(data[i] * data[i] + im[i] * im[i]);
-        // remove noise and eq level
+       // remove noise and eq level
         if(data[i] < noise[i])
           data[i] = 0; 
         else
-          data[i] = ((data[i] - noise[i])*( (256L - eq[i])) >> 4);
+          data[i] = ((data[i] - noise[i])*( (256L - eq[i])) >> 5);
   
 //          data[i] = ((data[i] - noise[i])*( (256L - eq[i])) >> 8);
 
@@ -153,7 +153,7 @@ void loop()
 //          Serial.print(" ");
 //        }
 //        Serial.print("\n");
-delay(2);
+//delay(1);
      // Fill background w/colors, then idle parts of columns will erase
       matrix.fillRect(0, 0, 8, 3, LED_RED);    // Upper section
       matrix.fillRect(0, 3, 8, 2, LED_YELLOW); // Mid
