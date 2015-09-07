@@ -101,14 +101,6 @@ Port LED code from Adafruit Picollo
   #define SERVOMAX  488 // This is the 'maximum' pulse length count (out of 4096)
   uint8_t servonum = 0;
   uint16_t pulseLength = 0;
-  uint16_t pulselength0 = 0;
-  uint16_t pulselength1 = 0;
-  uint16_t pulselength2 = 0;
-  uint16_t pulselength3 = 0;
-  uint16_t pulselength4 = 0;
-  uint16_t pulselength5 = 0;
-  uint16_t pulselength6 = 0;
-  uint16_t pulselength7 = 0;
   
   uint16_t amplitude[8] = {90, 90, 90, 90, 90, 90, 90, 90};
   uint16_t amplitude2[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -162,6 +154,7 @@ void loop()
   int level, y, sum;
   static long tt;
   int val;
+  uint8_t pistonHeight[8];
   
   if(debug)  Serial.println("Start sampling audio");
     
@@ -286,6 +279,8 @@ void loop()
     if(level < 0L)      c = 0;
     else if(level > 10) c = 10; // Allow dot to go a couple pixels off top
     else                c = (uint8_t)level;
+    
+    pistonHeight[x] = 10 - level;
 
     if(debug)  Serial.println("Keep the dot on the top");
     
@@ -328,4 +323,15 @@ void loop()
   }
   
   if(++colCount >= 10) colCount = 0;   
+  
+  for(x=0; x<8; x++) 
+  {
+    pulseLength = map(getDegreeFromHeight(pistonHeight[x]), 0, 180, SERVOMIN, SERVOMAX);
+    pwm.setPWM(i, 0, pulseLength);
+  }
+}
+
+int getDegreeFromHeight(int height)
+{
+  return height / 10 * 180;
 }
