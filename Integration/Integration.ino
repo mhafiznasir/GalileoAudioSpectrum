@@ -25,7 +25,7 @@ Port LED code from Adafruit Picollo
   char data[128];
   int analog_value[128];
   int i=0;
-  int debug = 0;
+  int debug = 1;
   byte
     peak[8],      // Peak level of each column; used for falling dots
     dotCount = 0, // Frame counter for delaying dot-falling speed
@@ -131,7 +131,7 @@ void setup()
   
   // -----------End servo shield code-----------
 }
-
+    uint8_t m = 30;
 void loop() 
 {
   uint8_t  x, L, nBins, binNum, weighting, c;
@@ -144,6 +144,31 @@ void loop()
   
   if(debug)  Serial.println("Start sampling audio");
     
+    if (m==30) m=120;
+       else if (m==120) m=30;
+  // Move each servo motor according to piston height
+  for(x=0; x<8; x++) 
+  {
+//    double m = getDegreeFromHeight(pistonHeight[x]);
+    //int m = map(pistonHeight[x], 0, 255, 30, 120);
+
+    if(debug)  
+    {
+      Serial.print("Going to move motor ");
+      Serial.println(x);
+      Serial.print("Degree: ");
+      Serial.println(m);
+      Serial.print("PistonHeight: ");
+      Serial.println(pistonHeight[x]);
+    }
+    
+    pulseLength = map(m, 0, 180, SERVOMIN, SERVOMAX);
+    //pulseLength = map(0, 0, 180, SERVOMIN, SERVOMAX);
+    pwm.setPWM(x, 0, pulseLength);
+  }
+  
+  delay(2000);
+  
   i = 0;
   while(i < 128)
   {
@@ -266,7 +291,7 @@ void loop()
     else if(level > 10) c = 10; // Allow dot to go a couple pixels off top
     else                c = (uint8_t)level;
     
-    pistonHeight[x] = 10 - level;
+    pistonHeight[x] = level;
 
     if(debug)  Serial.println("Keep the dot on the top");
     
@@ -310,15 +335,31 @@ void loop()
   
   if(++colCount >= 10) colCount = 0;   
   
+  if(debug)  Serial.println("Going to move motor");
+  
   // Move each servo motor according to piston height
-  for(x=0; x<8; x++) 
-  {
-    pulseLength = map(getDegreeFromHeight(pistonHeight[x]), 0, 180, SERVOMIN, SERVOMAX);
-    pwm.setPWM(i, 0, pulseLength);
-  }
+//  for(x=0; x<8; x++) 
+//  {
+//    //int m = getDegreeFromHeight(pistonHeight[x]);
+//    int m = 0;
+//    if(debug)  
+//    {
+//      Serial.print("Going to move motor ");
+//      Serial.println(x);
+//      Serial.print("Degree: ");
+//      Serial.println(m);
+//      Serial.print("PistonHeight: ");
+//      Serial.println(pistonHeight[x]);
+//    }
+//    pulseLength = map(m, 0, 180, SERVOMIN, SERVOMAX);
+//    //pulseLength = map(0, 0, 180, SERVOMIN, SERVOMAX);
+//    pwm.setPWM(x, 0, pulseLength);
+//  }
+  
+  delay(0);
 }
 
-int getDegreeFromHeight(int height)
+double getDegreeFromHeight(double height)
 {
-  return height / 10 * 180;
+  return height / 255 * 90 + 30;
 }
