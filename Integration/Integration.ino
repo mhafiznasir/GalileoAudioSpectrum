@@ -58,65 +58,6 @@ Port LED code from Adafruit Picollo
   // and weightings of the FFT spectrum output values to use.  Not all
   // buckets are used -- the bottom-most and several at the top are
   // either noisy or out of range or generally not good for a graph.
-//  col0data[] = {  2,  1,  // # of spectrum bins to merge, index of first
-//    111,   8 },           // Weights for each bin
-//  col1data[] = {  4,  1,  // 4 bins, starting at index 1
-//     19, 186,  38,   2 }, // Weights for 4 bins.  Got it now?
-//  col2data[] = {  5,  2,
-//     11, 156, 118,  16,   1 },
-//  col3data[] = {  8,  3,
-//      5,  55, 165, 164,  71,  18,   4,   1 },
-//  col4data[] = { 11,  5,
-//      3,  24,  89, 169, 178, 118,  54,  20,   6,   2,   1 },
-//  col5data[] = { 17,  7,
-//      2,   9,  29,  70, 125, 172, 185, 162, 118, 74,
-//     41,  21,  10,   5,   2,   1,   1 },
-//  col6data[] = { 25, 11,
-//      1,   4,  11,  25,  49,  83, 121, 156, 180, 185,
-//    174, 149, 118,  87,  60,  40,  25,  16,  10,   6,
-//      4,   2,   1,   1,   1 },
-//  col7data[] = { 37, 16,
-//      1,   2,   5,  10,  18,  30,  46,  67,  92, 118,
-//    143, 164, 179, 185, 184, 174, 158, 139, 118,  97,
-//     77,  60,  45,  34,  25,  18,  13,   9,   7,   5,
-//      3,   2,   2,   1,   1,   1,   1 },
-
-//  col0data[] = {  0, 0,  // # of spectrum bins to merge, index of first
-//    0,   0 },           // Weights for each bin
-//  col1data[] = {  1,  1,  // 4 bins, starting at index 1
-//     1, 1,  1,   1 }, // Weights for 4 bins.  Got it now?
-//  col2data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//  col3data[] = {  1,  1,
-//      1,  1, 1, 1,  1,  1,   1,   1 },
-//  col4data[] = { 1,  1,
-//      1,  1,  1, 1, 1, 1,  1,  1,   1,   1,   1 },
-//  col5data[] = { 1,  1,
-//      1,   1,  1,  1, 1, 1, 1, 1, 1, 1,
-//      1,  1,  1,   1,   1,   1,   1 },
-//  col6data[] = { 1, 1,
-//      1,   1,  1,  1,  1,  1, 1, 1, 1, 1,
-//    1, 1, 1,  1,  1,  1,  1,  1,  1,   1,
-//      1,   1,   1,   1,   1 },
-//  col7data[] = { 0 },
-
-//       col0data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col1data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col2data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col3data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col4data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col5data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col6data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-//       col7data[] = {  1,  1,
-//     1, 1, 1,  1,   1, 1 },
-
   col0data[] = { 0 },
   col1data[] = { 0 },
   col2data[] = { 0 },
@@ -143,7 +84,7 @@ Port LED code from Adafruit Picollo
   Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
   
   #define SERVOMIN  100 // This is the 'minimum' pulse length count (out of 4096)
-  #define SERVOMAX  488 // This is the 'maximum' pulse length count (out of 4096)
+  #define SERVOMAX  560 // This is the 'maximum' pulse length count (out of 4096)
   uint8_t servonum = 0;
   uint16_t pulseLength = 0;
   
