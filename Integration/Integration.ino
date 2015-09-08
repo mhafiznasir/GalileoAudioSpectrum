@@ -25,6 +25,7 @@ Port LED code from Adafruit Picollo
   char data[128];
   int analog_value[128];
   int i=0;
+//  int debug = 0;
   int debug = 1;
   byte
     peak[8],      // Peak level of each column; used for falling dots
@@ -90,6 +91,9 @@ Port LED code from Adafruit Picollo
   
   uint16_t amplitude[8] = {90, 90, 90, 90, 90, 90, 90, 90};
   uint16_t amplitude2[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  
+  uint8_t pistonHeight[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  uint8_t prevPistonHeight[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   // -------------------------------------------
   // -----------End servo shield code-----------
@@ -131,7 +135,7 @@ void setup()
   
   // -----------End servo shield code-----------
 }
-    uint8_t m = 30;
+    uint8_t m = 120;
 void loop() 
 {
   uint8_t  x, L, nBins, binNum, weighting, c;
@@ -140,18 +144,21 @@ void loop()
   int level, y, sum;
   static long tt;
   int val;
-  uint8_t pistonHeight[8];
   
   if(debug)  Serial.println("Start sampling audio");
     
-    if (m==30) m=120;
-       else if (m==120) m=30;
+//    if (m==30) m=120;
+//       else if (m==120) m=30;
   // Move each servo motor according to piston height
+    //x = 0;
   for(x=0; x<8; x++) 
   {
-//    double m = getDegreeFromHeight(pistonHeight[x]);
-    //int m = map(pistonHeight[x], 0, 255, 30, 120);
-
+    //double m = getDegreeFromHeight(pistonHeight[x]);
+    m = map(pistonHeight[x], 0, 10, 30, 120);
+    
+    pulseLength = map(m, 0, 180, SERVOMIN, SERVOMAX);
+    pwm.setPWM(x, 0, pulseLength);
+    
     if(debug)  
     {
       Serial.print("Going to move motor ");
@@ -160,14 +167,10 @@ void loop()
       Serial.println(m);
       Serial.print("PistonHeight: ");
       Serial.println(pistonHeight[x]);
+      Serial.print("pulseLength: ");
+      Serial.println(pulseLength);
     }
-    
-    pulseLength = map(m, 0, 180, SERVOMIN, SERVOMAX);
-    //pulseLength = map(0, 0, 180, SERVOMIN, SERVOMAX);
-    pwm.setPWM(x, 0, pulseLength);
   }
-  
-  delay(2000);
   
   i = 0;
   while(i < 128)
@@ -285,7 +288,18 @@ void loop()
     level = 10L * (col[x][colCount] - minLvlAvg[x]) / (long)(maxLvlAvg[x] - minLvlAvg[x]);
 
     if(debug)  Serial.println("Clip the output and convert it to byte");
-    
+    if(debug)  {
+      Serial.print("x:");
+      Serial.println(x);
+      Serial.print("colCount:");
+      Serial.println(colCount);
+      Serial.print("col[x][colCount]:");
+      Serial.println(col[x][colCount]);
+      Serial.println("minLvlAvg[x]:");
+      Serial.println(minLvlAvg[x]);
+      Serial.println("maxLvlAvg[x]:");
+      Serial.println(maxLvlAvg[x]);
+    }
     // Clip output and convert to byte:
     if(level < 0L)      c = 0;
     else if(level > 10) c = 10; // Allow dot to go a couple pixels off top
@@ -319,7 +333,7 @@ void loop()
     else           matrix.drawPixel(x, y, LED_GREEN);
   }
 
-  matrix.writeDisplay();
+  //matrix.writeDisplay();
   
   // Every third frame, make the peak pixels drop by 1:
   if(debug)  Serial.println("Make pixel drop by 1 every 3 frame dotcount");
@@ -357,9 +371,36 @@ void loop()
 //  }
   
   delay(0);
+//  for(x=0; x<8; x++) 
+//  {
+//    //double m = getDegreeFromHeight(pistonHeight[x]);
+////    int m = map(pistonHeight[x], 0, 255, 30, 120);
+//
+//    
+//    
+//    pulseLength = map(30, 0, 180, SERVOMIN, SERVOMAX);
+////    pulseLength = map(0, 0, 180, SERVOMIN, SERVOMAX);
+//    pwm.setPWM(x, 0, pulseLength);
+//    delay(2000);
+//    pulseLength = map(120, 0, 180, SERVOMIN, SERVOMAX);
+////    pulseLength = map(0, 0, 180, SERVOMIN, SERVOMAX);
+//    pwm.setPWM(x, 0, pulseLength);
+//    if(debug)  
+//    {
+//      Serial.print("Are we here ");
+//      Serial.println(x);
+//      Serial.print("Degree: ");
+//      Serial.println(m);
+//      Serial.print("PistonHeight: ");
+//      Serial.println(pistonHeight[x]);
+//      Serial.print("pulseLength: ");
+//      Serial.println(pulseLength);
+//    }
+//  }
+//  delay(2000);
 }
 
 double getDegreeFromHeight(double height)
 {
-  return height / 255 * 90 + 30;
+  return height / 10 * 90 + 30;
 }
