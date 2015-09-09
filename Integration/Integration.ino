@@ -146,7 +146,7 @@ void setup()
   }
 
   Serial.begin(9600);
-  matrix.begin(0x70);
+  matrix.begin(0x71);
   
   // ----------End audio spectrum code----------
   
@@ -236,9 +236,9 @@ void loop()
   delay(0);
   
   // Fill background w/colors, then idle parts of columns will erase
-  //matrix.fillRect(0, 0, 8, 3, LED_RED);    // Upper section
-  //matrix.fillRect(0, 3, 8, 2, LED_YELLOW); // Mid
-  //matrix.fillRect(0, 5, 8, 3, LED_GREEN);  // Lower section
+  matrix.fillRect(0, 0, 8, 3, LED_RED);    // Upper section
+  matrix.fillRect(0, 3, 8, 2, LED_YELLOW); // Mid
+  matrix.fillRect(0, 5, 8, 3, LED_GREEN);  // Lower section
 
   if(debug)  Serial.println("Downsample spectrum output to 8 columns");
   
@@ -336,13 +336,13 @@ void loop()
     if(peak[x] <= 0) 
     { 
       // Empty column?
-      //matrix.drawLine(x, 0, x, 7, LED_OFF);
+      matrix.drawLine(x, 0, x, 7, LED_OFF);
       continue;
     } 
     else if(c < 8) 
     { 
       // Partial column?
-      //matrix.drawLine(x, 0, x, 7 - c, LED_OFF);
+      matrix.drawLine(x, 0, x, 7 - c, LED_OFF);
     }
 
     // The 'peak' dot color varies, but doesn't necessarily match
@@ -350,12 +350,12 @@ void loop()
     if(debug)  Serial.println("Draw pixels");
     
     y = 8 - peak[x];
-//    if(y < 2)      matrix.drawPixel(x, y, LED_RED);
-//    else if(y < 6) matrix.drawPixel(x, y, LED_YELLOW);
-//    else           matrix.drawPixel(x, y, LED_GREEN);
+    if(y < 2)      matrix.drawPixel(x, y, LED_RED);
+    else if(y < 6) matrix.drawPixel(x, y, LED_YELLOW);
+    else           matrix.drawPixel(x, y, LED_GREEN);
   }
 
-  //matrix.writeDisplay();
+  matrix.writeDisplay();
   
   // Every third frame, make the peak pixels drop by 1:
   if(debug)  Serial.println("Make pixel drop by 1 every 3 frame dotcount");
